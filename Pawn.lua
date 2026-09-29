@@ -248,8 +248,12 @@ function PawnInitialize()
 	if not VgerCore.IsMainline then
 		-- SetAuctionItem was removed in 8.3.0 but is still there on Classic.  The (incorrect) way that BankItems hooks this function
 		-- causes the detection to fail, so just directly check the version.
-		hooksecurefunc(GameTooltip, "SetAuctionItem", function(_, ...) PawnUpdateTooltip("GameTooltip", "SetAuctionItem", ...) end)
-		hooksecurefunc(GameTooltip, "SetAuctionSellItem", function(_, ...) PawnUpdateTooltip("GameTooltip", "SetAuctionSellItem", ...) end)
+		if GameTooltip.SetAuctionItem then
+			hooksecurefunc(GameTooltip, "SetAuctionItem", function(_, ...) PawnUpdateTooltip("GameTooltip", "SetAuctionItem", ...) end)
+		end
+		if GameTooltip.SetAuctionSellItem then
+			hooksecurefunc(GameTooltip, "SetAuctionSellItem", function(_, ...) PawnUpdateTooltip("GameTooltip", "SetAuctionSellItem", ...) end)
+		end
 	end
 	if VgerCore.IsMainline then
 		hooksecurefunc(GameTooltip, "SetItemKey", function(_, ItemID, ItemLevel, Suffix, ...) PawnUpdateTooltip("GameTooltip", "SetItemKey", ItemID, ItemLevel, Suffix, ...) end)
@@ -1214,7 +1218,7 @@ function PawnRecalculateScaleTotal(ScaleName)
 	end
 
 	-- Now the meta gems.
-	if not VgerCore.IsClassic and not VgerCore.IsMainline then
+	if PawnMetaGemQualityLevels and not VgerCore.IsClassic and not VgerCore.IsMainline then
 		for _, QualityLevelData in pairs(PawnMetaGemQualityLevels) do
 			local ItemLevel = QualityLevelData[1]
 			local GemData = QualityLevelData[2]
@@ -5778,6 +5782,8 @@ function PawnAddPluginScaleFromTemplate(ProviderInternalName, ClassID, SpecID, S
 	if not PawnCommon then VgerCore.Fail("Can't add plugin scales until Pawn starts to initialize.") return end
 
 	local LocalizedClassName, UnlocalizedClassName = PawnGetClassInfo(ClassID)
+	-- This client doesn't have this class (e.g. no Death Knights), so there's nothing to add a scale for.
+	if not UnlocalizedClassName or not RAID_CLASS_COLORS[UnlocalizedClassName] then return end
 	local _, LocalizedSpecName, IconTexturePath, Role
 	if SpecID then
 		_, LocalizedSpecName, _, IconTexturePath, Role = PawnGetSpecializationInfoForClassID(ClassID, SpecID)
