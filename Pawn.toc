@@ -1,4 +1,4 @@
-﻿## Interface: 120100
+﻿## Interface: 120100, 16001
 ## Title: Pawn
 ## Version: 2.13.17
 ## Notes: Pawn helps you compare items and find upgrades.
@@ -37,8 +37,7 @@ Localization.zhCN.lua [AllowLoadTextLocale zhCN]
 Localization.zhTW.lua [AllowLoadTextLocale zhTW]
 UIStrings.lua
 TooltipParsing.lua
-Gems.lua [AllowLoadGameType mainline]
-GemsClassic.lua [AllowLoadGameType vanilla]
+GemsClassic.lua
 GemsBurningCrusade.lua [AllowLoadGameType tbc]
 GemsWrath.lua [AllowLoadGameType wrath]
 GemsCataclysm.lua [AllowLoadGameType cata]
@@ -49,5 +48,4 @@ Pawn.lua
 PawnBags.lua
 PawnUI.lua
 PawnUI.xml
-AskMrRobot.lua [AllowLoadGameType mainline]
-ClassicHawsJon.lua [AllowLoadGameType classic]
+ClassicHawsJon.lua

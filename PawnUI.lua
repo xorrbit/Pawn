@@ -2642,11 +2642,19 @@ end
 -- We need to do this in Lua because there's no tab template that exists in every version of the game.
 function PawnUICreateTabs()
 	local TabCount = #PawnUITabList
+	-- Which tab template exists varies by client (including WoW Forever), so probe for one that works.
 	local TabTemplate
-	if VgerCore.IsDragonflightOrLater then
-		TabTemplate = "PanelTabButtonTemplate"
-	else
-		TabTemplate = "CharacterFrameTabButtonTemplate"
+	local Candidates = { "PanelTabButtonTemplate", "CharacterFrameTabButtonTemplate", "CharacterFrameTabTemplate" }
+	if not VgerCore.IsDragonflightOrLater then
+		Candidates = { "CharacterFrameTabButtonTemplate", "PanelTabButtonTemplate", "CharacterFrameTabTemplate" }
+	end
+	for _, Candidate in ipairs(Candidates) do
+		local Ok, Probe = pcall(CreateFrame, "Button", nil, PawnUIFrame, Candidate)
+		if Ok and Probe then
+			Probe:Hide()
+			TabTemplate = Candidate
+			break
+		end
 	end
 
 	local LastTab

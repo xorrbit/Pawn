@@ -19,6 +19,9 @@ local _
 
 local IsInitialized
 
+-- WoW Forever (and mainline) use the modern container frame mixin; older Classic clients use ContainerFrame_Update.
+local UseModernBags = VgerCore.IsMainline or (ContainerFrameMixin and ContainerFrameMixin.UpdateItems and true) or false
+
 local NumberOfContainerFrames = NUM_TOTAL_BAG_FRAMES or NUM_CONTAINER_FRAMES
 local PawnBagsRefreshCounter = 1
 
@@ -88,7 +91,7 @@ end
 local function UpdateContainerFrameUpgradeIcons(self)
 	if PawnIsAThirdPartyBagRegistered then return end
 
-	if VgerCore.IsMainline then
+	if UseModernBags then
 		for _, ItemButton in self:EnumerateValidItems() do
 			UpdateItemButtonUpgradeIcon(ItemButton)
 		end
@@ -108,13 +111,15 @@ function PawnBags:Initialize()
 	if PawnIsAThirdPartyBagRegistered then return false end
 	if IsInitialized then return true end
 
-	if VgerCore.IsMainline then
+	if UseModernBags then
 		hooksecurefunc(ContainerFrameMixin, "UpdateItems", UpdateContainerFrameUpgradeIcons)
 		-- Hooking the mixin is not retroactive to bags that have already been created. So update all of those too.
-		hooksecurefunc(ContainerFrameCombinedBags, "UpdateItems", UpdateContainerFrameUpgradeIcons)
+		if ContainerFrameCombinedBags then
+			hooksecurefunc(ContainerFrameCombinedBags, "UpdateItems", UpdateContainerFrameUpgradeIcons)
+		end
 		for i = 1, NumberOfContainerFrames do
 			local Bag = _G["ContainerFrame" .. i]
-			hooksecurefunc(Bag, "UpdateItems", UpdateContainerFrameUpgradeIcons)
+			if Bag then hooksecurefunc(Bag, "UpdateItems", UpdateContainerFrameUpgradeIcons) end
 		end
 	else
 		hooksecurefunc("ContainerFrame_Update", UpdateContainerFrameUpgradeIcons)
@@ -128,12 +133,12 @@ function PawnBags:RefreshAll()
 	PawnBags:Initialize()
 
 	PawnBagsRefreshCounter = PawnBagsRefreshCounter + 1
-	if VgerCore.IsMainline then
+	if UseModernBags and ContainerFrameCombinedBags then
 		if ContainerFrameCombinedBags:IsShown() then UpdateContainerFrameUpgradeIcons(ContainerFrameCombinedBags) end
 	end
 	for i = 1, NumberOfContainerFrames do
 		local Bag = _G["ContainerFrame" .. i]
-		if Bag:IsShown() then UpdateContainerFrameUpgradeIcons(Bag) end
+		if Bag and Bag:IsShown() then UpdateContainerFrameUpgradeIcons(Bag) end
 	end
 end
 
